@@ -1,20 +1,27 @@
+from flask import Flask, request, jsonify
 from agent_core.agent import MyAgent
 
+app = Flask(__name__)
 
-def main():
-    agent = MyAgent()
-    print("你的专属 Agent 已启动")
-    print("命令：计算 1+2 | 记住 买牛奶 | 我的待办 | 删除待办 1 | 获取当前时间 | 获取宜宾天气 | 获取空气质量 | clear | exit")
+agent = MyAgent()
 
-    while True:
-        user_input = input("\n你: ").strip()
-        if user_input.lower() == "exit":
-            break
-        if not user_input:
-            continue
-        response = agent.run(user_input)
-        print(f"Agent: {response}")
+@app.route("/")
+def home():
+    return "My Agent is running!"
 
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    user_input = data.get("message", "")
+
+    if not user_input:
+        return jsonify({"error": "请输入内容"})
+
+    response = agent.run(user_input)
+
+    return jsonify({
+        "response": response
+    })
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000)
